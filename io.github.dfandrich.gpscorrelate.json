@@ -1,19 +1,32 @@
 {
     "app-id":"io.github.dfandrich.gpscorrelate",
     "runtime":"org.freedesktop.Platform",
-    "runtime-version":"22.08",
+    "runtime-version":"23.08",
     "sdk":"org.freedesktop.Sdk",
     "command":"gpscorrelate-gui",
     "finish-args":[
       "--socket=fallback-x11",
       "--socket=wayland",
       "--share=ipc",
-      /* Neeeded until the application uses a file chooser portal */
-      "--filesystem=host",
       /* Needed for gvfs to work */
       "--talk-name=org.gtk.vfs.*"
     ],
     "modules":[
+        {
+          "name": "inih",
+          "buildsystem": "meson",
+          "cleanup": [
+              "/include",
+              "/lib/pkgconfig"
+          ],
+          "sources": [
+              {
+                  "type": "archive",
+                  "url": "https://github.com/benhoyt/inih/archive/refs/tags/r58.tar.gz",
+                  "sha256": "e79216260d5dffe809bda840be48ab0eec7737b2bb9f02d2275c1b46344ea7b7"
+              }
+          ]
+        },
         {
           "name": "exiv2",
           "buildsystem": "cmake-ninja",
@@ -26,16 +39,16 @@
           "cleanup": [
               "/bin",
               "/include",
-              "/lib/cmake",
               "/lib/pkgconfig",
               "/lib/*.a",
-              "/share/man"
+              "/share/cmake/exiv2/*",
+              "/share/man/man1/*"
           ],
           "sources": [
               {
                   "type": "archive",
-                  "url": "https://github.com/Exiv2/exiv2/releases/download/v0.27.6/exiv2-0.27.6-Source.tar.gz",
-                  "sha256": "4c192483a1125dc59a3d70b30d30d32edace9e14adf52802d2f853abf72db8a6"
+                  "url": "https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.2.tar.gz",
+                  "sha256": "543bead934135f20f438e0b6d8858c55c5fcb7ff80f5d1d55489965f1aad58b9"
               }
           ]
         },
@@ -43,8 +56,7 @@
             "name": "gpscorrelate-gui",
             "buildsystem": "simple",
             "build-commands": [
-                /* gettext catalogues are dropped if stored in the standard location, so move them */
-                "make -j${FLATPAK_BUILDER_N_JOBS} prefix=${FLATPAK_DEST} localedir=${FLATPAK_DEST}/share/gpscorrelate/locale CFLAGS=\"${CFLAGS} -DENABLE_NLS=1\"",
+                "make -j${FLATPAK_BUILDER_N_JOBS} prefix=${FLATPAK_DEST} localedir=${FLATPAK_DEST}/share/gpscorrelate/locale CFLAGS=\"${CFLAGS} -DENABLE_NLS=1\" CXXFLAGS=\"${CXXFLAGS} -DENABLE_NLS=1\"",
                 "make prefix=${FLATPAK_DEST} localedir=${FLATPAK_DEST}/share/gpscorrelate/locale install install-po",
                 "cp gpscorrelate.desktop ${FLATPAK_ID}.desktop",
                 "desktop-file-install --vendor= --set-icon=${FLATPAK_ID} --dir=/app/share/applications ${FLATPAK_ID}.desktop",
@@ -55,15 +67,12 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://github.com/dfandrich/gpscorrelate/releases/download/2.0/gpscorrelate-2.0.tar.xz",
-                    "sha256": "3fba8ad72b9b42dfc870a04d1207357c2a6c28842b1ede51e28b30a93b48debe"
-                },
-                {
-                    "type": "file",
-                    "path": "io.github.dfandrich.gpscorrelate.metainfo.xml"
+                    "url": "https://github.com/dfandrich/gpscorrelate/releases/download/2.1/gpscorrelate-2.1.tar.xz",
+                    "sha256": "006ad389e3579b2e3ed3046902ed577ecc8253ab159f9d4034131dd38f827281"
                 }
             ],
             "cleanup": [
+                "/share/cmake",
                 "/share/man"
             ]
         }
